@@ -22,7 +22,7 @@ class SmsClient:
     SANDBOX_BASE_URL: str = "https://messaging-sandbox.fdibiz.com"
     PRODUCTION_BASE_URL: str = "https://messaging.fdibiz.com"
 
-    def _init__(
+    def __init__(
         self, *, api_key: str, api_secret: str, sandbox: Optional[bool] = True
     ):
         """
