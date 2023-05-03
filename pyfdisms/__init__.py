@@ -1,17 +1,9 @@
-import logging
 import re
-import sys
 import requests
 from typing import (
     Optional, Dict, Any, List, Tuple
 )
-
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)],
-)
+from .fdi_sms_exceptions import BadRequest, Unauthorized, Forbidden, NotFound, UnprocessableEntity, InternalServerError, ServiceUnavailable, UnknownError
 
 
 class SmsClient:
@@ -50,7 +42,7 @@ class SmsClient:
         self._access_token: str
         self._refresh_token: str
 
-        self._access_token, self.__refresh_token = self._tokens()
+        self._access_token, self._refresh_token = self._tokens()
 
     def _tokens(self) -> Tuple:
         """
@@ -72,10 +64,26 @@ class SmsClient:
             },
             _headers=False,
         )
-        if resp["success"]:
+        if resp["status_code"] == 200:
             access_token = resp.get("access_token")
             refresh_token = resp.get("refresh_token")
-        return access_token, refresh_token
+            return access_token, refresh_token
+        elif resp["status_code"] == 400:
+            raise BadRequest
+        elif resp["status_code"] == 401:
+            raise Unauthorized
+        elif resp["status_code"] == 403:
+            raise Forbidden
+        elif resp["status_code"] == 404:
+            raise NotFound
+        elif resp["status_code"] == 422:
+            raise UnprocessableEntity
+        elif resp["status_code"] == 500:
+            raise InternalServerError
+        elif resp["status_code"] == 503:
+            raise ServiceUnavailable
+        else:
+            raise UnknownError(data=resp)
 
     def refresh(self) -> None:
         """
@@ -92,10 +100,25 @@ class SmsClient:
             },
             _headers=False,
         )
-        if resp["success"]:
+        if resp["status_code"] == 200:
             self._access_token = resp.get("access_token")
             self._refresh_token = resp.get("refresh_token")
-        return
+        elif resp["status_code"] == 400:
+            raise BadRequest
+        elif resp["status_code"] == 401:
+            raise Unauthorized
+        elif resp["status_code"] == 403:
+            raise Forbidden
+        elif resp["status_code"] == 404:
+            raise NotFound
+        elif resp["status_code"] == 422:
+            raise UnprocessableEntity
+        elif resp["status_code"] == 500:
+            raise InternalServerError
+        elif resp["status_code"] == 503:
+            raise ServiceUnavailable
+        else:
+            raise UnknownError(data=resp)
 
     @property
     def _headers(self) -> Dict[str, str]:
@@ -138,17 +161,15 @@ class SmsClient:
                 url=url, params=params, headers=self._headers
             )
 
-        if resp.status_code == 200:
-            return resp.json()
-        else:
-            if "success" in resp.json():
-                return resp.json()
+        try:
+            data = resp.json()
+            data["status_code"] = resp.status_code
+            return data
+        except:
+            if resp.status_code == 500:
+                raise InternalServerError
             else:
-                return {
-                    "success": False,
-                    "status": resp.status_code,
-                    "message": resp.text,
-                }
+                raise UnknownError(resp.text)
 
     def _post(
         self, url: str, body: Dict[Any, Any], _headers: bool = True
@@ -178,7 +199,15 @@ class SmsClient:
                 url=url, json=body, headers=self._headers
             )
 
-        return resp.json()
+        try:
+            data = resp.json()
+            data["status_code"] = resp.status_code
+            return data
+        except:
+            if resp.status_code == 500:
+                raise InternalServerError
+            else:
+                raise UnknownError(resp.text)
 
     def _clean_mobile_number(self, mobile_number: str) -> str:
         """
@@ -235,7 +264,24 @@ class SmsClient:
             url=url,
         )
 
-        return resp
+        if resp["status_code"] == 200:
+            return resp
+        elif resp["status_code"] == 400:
+            raise BadRequest
+        elif resp["status_code"] == 401:
+            raise Unauthorized
+        elif resp["status_code"] == 403:
+            raise Forbidden
+        elif resp["status_code"] == 404:
+            raise NotFound
+        elif resp["status_code"] == 422:
+            raise UnprocessableEntity
+        elif resp["status_code"] == 500:
+            raise InternalServerError
+        elif resp["status_code"] == 503:
+            raise ServiceUnavailable
+        else:
+            raise UnknownError(data=resp)
 
     def balance_on_date(self, date_string: str) -> Dict[str, Any]:
         """
@@ -252,7 +298,24 @@ class SmsClient:
             url=url,
         )
 
-        return resp
+        if resp["status_code"] == 200:
+            return resp
+        elif resp["status_code"] == 400:
+            raise BadRequest
+        elif resp["status_code"] == 401:
+            raise Unauthorized
+        elif resp["status_code"] == 403:
+            raise Forbidden
+        elif resp["status_code"] == 404:
+            raise NotFound
+        elif resp["status_code"] == 422:
+            raise UnprocessableEntity
+        elif resp["status_code"] == 500:
+            raise InternalServerError
+        elif resp["status_code"] == 503:
+            raise ServiceUnavailable
+        else:
+            raise UnknownError(data=resp)
 
     def send_single(self, *, msisdn: str, message: str, msg_ref: str, sender_id: str = None, callback_url: str = None) -> Dict[str, Any]:
         """
@@ -283,7 +346,24 @@ class SmsClient:
             body=body,
         )
 
-        return resp
+        if resp["status_code"] == 200:
+            return resp
+        elif resp["status_code"] == 400:
+            raise BadRequest
+        elif resp["status_code"] == 401:
+            raise Unauthorized
+        elif resp["status_code"] == 403:
+            raise Forbidden
+        elif resp["status_code"] == 404:
+            raise NotFound
+        elif resp["status_code"] == 422:
+            raise UnprocessableEntity
+        elif resp["status_code"] == 500:
+            raise InternalServerError
+        elif resp["status_code"] == 503:
+            raise ServiceUnavailable
+        else:
+            raise UnknownError(data=resp)
 
     def send_bulk(self, *, msisdn_list: List, message: str, msg_ref: str, sender_id: str = None, callback_url: str = None) -> Dict[str, Any]:
         """
@@ -317,7 +397,24 @@ class SmsClient:
             body=body,
         )
 
-        return resp
+        if resp["status_code"] == 200:
+            return resp
+        elif resp["status_code"] == 400:
+            raise BadRequest
+        elif resp["status_code"] == 401:
+            raise Unauthorized
+        elif resp["status_code"] == 403:
+            raise Forbidden
+        elif resp["status_code"] == 404:
+            raise NotFound
+        elif resp["status_code"] == 422:
+            raise UnprocessableEntity
+        elif resp["status_code"] == 500:
+            raise InternalServerError
+        elif resp["status_code"] == 503:
+            raise ServiceUnavailable
+        else:
+            raise UnknownError(data=resp)
 
     def get_stats(self) -> Dict[str, Any]:
         """
@@ -333,7 +430,24 @@ class SmsClient:
             url=url
         )
 
-        return resp
+        if resp["status_code"] == 200:
+            return resp
+        elif resp["status_code"] == 400:
+            raise BadRequest
+        elif resp["status_code"] == 401:
+            raise Unauthorized
+        elif resp["status_code"] == 403:
+            raise Forbidden
+        elif resp["status_code"] == 404:
+            raise NotFound
+        elif resp["status_code"] == 422:
+            raise UnprocessableEntity
+        elif resp["status_code"] == 500:
+            raise InternalServerError
+        elif resp["status_code"] == 503:
+            raise ServiceUnavailable
+        else:
+            raise UnknownError(data=resp)
 
     def get_stats_on_date(self, date_string: str) -> Dict[str, Any]:
         """
@@ -352,7 +466,24 @@ class SmsClient:
             url=url
         )
 
-        return resp
+        if resp["status_code"] == 200:
+            return resp
+        elif resp["status_code"] == 400:
+            raise BadRequest
+        elif resp["status_code"] == 401:
+            raise Unauthorized
+        elif resp["status_code"] == 403:
+            raise Forbidden
+        elif resp["status_code"] == 404:
+            raise NotFound
+        elif resp["status_code"] == 422:
+            raise UnprocessableEntity
+        elif resp["status_code"] == 500:
+            raise InternalServerError
+        elif resp["status_code"] == 503:
+            raise ServiceUnavailable
+        else:
+            raise UnknownError(data=resp)
 
     def validate_msisdn(self, msisdn: str, country_code: str) -> Dict[str, Any]:
         """
@@ -380,14 +511,31 @@ class SmsClient:
             body=body
         )
 
-        return resp
+        if resp["status_code"] == 200:
+            return resp
+        elif resp["status_code"] == 400:
+            raise BadRequest
+        elif resp["status_code"] == 401:
+            raise Unauthorized
+        elif resp["status_code"] == 403:
+            raise Forbidden
+        elif resp["status_code"] == 404:
+            raise NotFound
+        elif resp["status_code"] == 422:
+            raise UnprocessableEntity
+        elif resp["status_code"] == 500:
+            raise InternalServerError
+        elif resp["status_code"] == 503:
+            raise ServiceUnavailable
+        else:
+            raise UnknownError(data=resp)
 
     def validate_msisdn_bulk(self, msisdn_list: List, country_code: str) -> Dict[str, Any]:
         """
         Check whether a list of MSISDN is valid for a specific country.
 
         Args:
-            msisdn (str): The mobile number to validate.
+            msisdn_list (str): The list of mobile numbers to validate.
             country_code (str): Two character ISO 3361-1 country code.
 
         Returns:
@@ -411,4 +559,21 @@ class SmsClient:
             body=body
         )
 
-        return resp
+        if resp["status_code"] == 200:
+            return resp
+        elif resp["status_code"] == 400:
+            raise BadRequest
+        elif resp["status_code"] == 401:
+            raise Unauthorized
+        elif resp["status_code"] == 403:
+            raise Forbidden
+        elif resp["status_code"] == 404:
+            raise NotFound
+        elif resp["status_code"] == 422:
+            raise UnprocessableEntity
+        elif resp["status_code"] == 500:
+            raise InternalServerError
+        elif resp["status_code"] == 503:
+            raise ServiceUnavailable
+        else:
+            raise UnknownError(data=resp)
