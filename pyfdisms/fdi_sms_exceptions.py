@@ -6,7 +6,7 @@ class BadRequest(Exception):
 
 
 class Unauthorized(Exception):
-    error_message = "Unauthorized: missing token or token has expired."
+    error_message = "Unauthorized: Well, well, well... it seems your token went out for a quick coffee break and never came back - try generating a new one."
 
     def __init__(self, error_message=error_message):
         super().__init__(error_message)
@@ -44,5 +44,12 @@ class ServiceUnavailable(Exception):
     error_message = "Service Unavailable: We’re temporarily offline for maintenance. Please try again later."
 
     def __init__(self, error_message=error_message):
+        super().__init__(error_message)
+
+
+class UnknownError(Exception):
+    error_message = "Whoooops! Don't know what happend"
+
+    def __init__(self, error_message=error_message, data={}):
         super().__init__(error_message)
 
