@@ -15,7 +15,7 @@ pip install pyfdisms
 First, you need to import the SmsClient class from the SDK.
 
 ```python
-from fdismsclient import SmsClient
+from pyfdisms import SmsClient
 ```
 Then, initialize the client with your API key and API secret. You can choose to use the sandbox environment for testing by setting the sandbox parameter to True (default value). When you're ready to use the production environment, set sandbox to False.
 
