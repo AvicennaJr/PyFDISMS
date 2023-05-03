@@ -7,7 +7,7 @@ A python wrapper for interacting with [FDI SMS API](https://fdisms.docs.apiary.i
 To install this SDK, simply use pip:
 
 ```bash
-pip install fdismsclient
+pip install pyfdisms
 ```
 
 ## Getting Started
