@@ -48,8 +48,7 @@ class ServiceUnavailable(Exception):
 
 
 class UnknownError(Exception):
-    error_message = "Whoooops! Don't know what happend"
 
-    def __init__(self, error_message=error_message, data={}):
-        super().__init__(error_message)
+    def __init__(self, error):
+        super().__init__("Whoooops! Don't know what happend: " + error)
 
